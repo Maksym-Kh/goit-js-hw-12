@@ -8,11 +8,13 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 const refs = {
     galleryList: document.querySelector(".gallery"),
     loader: document.querySelector('.loader'),
+    moreBtn: document.querySelector('.more-btn'),
 }
 
 export const createGallery = images => {
     const imageTemplate = images.map(createImagesTemplate).join('');
-    refs.galleryList.innerHTML = imageTemplate;
+  // refs.galleryList.innerHTML = imageTemplate;
+  refs.galleryList.insertAdjacentHTML('beforeend', imageTemplate)
     lightbox.refresh();
 } 
 
@@ -56,4 +58,12 @@ export const showLoader = () => {
 
 export const hideLoader = () => {
     refs.loader.classList.remove('isOpen');
+}
+
+export const showLoadMoreButton = () => {
+  refs.moreBtn.classList.remove('isHidden');
+}
+
+export const hideLoadMoreButton = () => {
+  refs.moreBtn.classList.add('isHidden');
 }
