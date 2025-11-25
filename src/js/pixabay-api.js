@@ -19,6 +19,5 @@ const params = new URLSearchParams({
 
 
     const response = await axios.get(`https://pixabay.com/api/?key=${myApiKey}&${params}`);
-    // console.log(response.data);
     return response.data;
 };

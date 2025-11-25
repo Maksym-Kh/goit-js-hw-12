@@ -22,7 +22,7 @@ const refs = {
     let currentQuery = '';
 let currentPage = 1;
         const per_page = 15;
-// console.log(currentPage);
+
     
     // currentPage = 1;
 let galleryCardHeight = null;
@@ -79,18 +79,14 @@ try {
     createGallery(imageArr);
 
 
-    // galleryCardHeight =  refs.galleryList.querySelector('li').getBoundingClientRect().height;
-// console.log(galleryCardHeight);
-// 
     currentPage += 1;
-    //
     const totalPages = Math.ceil(totalHits / per_page);
-console.log(totalPages);
+
         if (currentPage <= totalPages) {
         showLoadMoreButton();
     
     }
-// 
+
 
 } catch (error) {
         hideLoader();
@@ -115,9 +111,6 @@ const onMoreBtnHandle = async evt => {
     const response = await getImagesByQuery(currentQuery, currentPage);
         const newImage = response.hits;
         const totalHits = response.totalHits;
-        console.log(newImage);
-        console.log(totalHits); 
-        console.log(per_page);
 
 
 
@@ -136,21 +129,19 @@ const onMoreBtnHandle = async evt => {
         };
 
 
-        // insertAdjacentHTML("beforeend", newImage);
         
         createGallery(newImage);
         currentPage += 1;
 
         
  galleryCardHeight =  refs.galleryList.querySelector('li').getBoundingClientRect().height;
-console.log(galleryCardHeight);
+
         scrollBy({
             top: galleryCardHeight * 2,
             behavior: "smooth",
 })
 
         const totalPages = Math.ceil(totalHits / per_page);
-        // const loadedImagesCount = (currentPage - 1) * per_page;
 
         if (currentPage > totalPages) {
             hideLoadMoreButton();
