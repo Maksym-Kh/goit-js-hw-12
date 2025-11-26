@@ -11,12 +11,13 @@ const refs = {
     moreBtn: document.querySelector('.more-btn'),
 }
 
-export const createGallery = images => {
-    const imageTemplate = images.map(createImagesTemplate).join('');
-  // refs.galleryList.innerHTML = imageTemplate;
-  refs.galleryList.insertAdjacentHTML('beforeend', imageTemplate)
-    lightbox.refresh();
-} 
+let lightbox = new SimpleLightbox('.gallery a', {
+            captionsData: 'alt',
+            captionsDelay: 250,
+        });
+
+
+
 
 
 
@@ -40,12 +41,30 @@ export const createImagesTemplate = image => {
 };
 
 
+export const createGallery = images => {
+    const imageTemplate = images.map(createImagesTemplate).join('');
+  refs.galleryList.innerHTML = imageTemplate;
+    lightbox.refresh();
+} 
+
+export const appendGallery = images => { 
+  const imageTemplate = images.map(createImagesTemplate).join('');
+  refs.galleryList.insertAdjacentHTML('beforeend', imageTemplate);
+  lightbox.refresh();
+}
+
+export const getScrollHeight = () => { 
+    const firstItem = refs.galleryList.querySelector('li');
+    if (firstItem) {
+        return firstItem.getBoundingClientRect().height * 2; 
+    }
+    return 0;
+}
 
 
-let lightbox = new SimpleLightbox('.gallery a', {
-            captionsData: 'alt',
-            captionsDelay: 250,
-        });
+
+
+
 
 
 export const clearGallery = () => {

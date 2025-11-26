@@ -1,6 +1,6 @@
-import { getImagesByQuery } from "./js/pixabay-api"
+import { getImagesByQuery, PER_PAGE } from "./js/pixabay-api"
 
-import { createGallery, clearGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton} from "./js/render-functions"
+import { createGallery, appendGallery ,clearGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton, getScrollHeight} from "./js/render-functions"
 
 import errorSvg from "./img/error.svg"
 // Описаний у документації
@@ -13,7 +13,6 @@ const refs = {
     searchBtn: document.querySelector('[type="submit"]'),
     searchInput: document.querySelector('[name="search-text"]'),
     form: document.querySelector('.form'),
-    galleryList: document.querySelector('.gallery'),
     moreBtn: document.querySelector('.more-btn'),
 }
 
@@ -21,12 +20,10 @@ const refs = {
     hideLoadMoreButton();
     let currentQuery = '';
 let currentPage = 1;
-        const per_page = 15;
 
+let totalHits = 0;
     
-    // currentPage = 1;
-let galleryCardHeight = null;
-
+  
 
 const onFormInter = async evt => {
     evt.preventDefault();
@@ -38,7 +35,7 @@ const onFormInter = async evt => {
     
     clearGallery();   
 // 
-
+hideLoadMoreButton();
 // 
     if (query === '') {
         iziToast.error({
@@ -58,11 +55,11 @@ try {
 
     const response = await getImagesByQuery(query, currentPage);
     const imageArr = response.hits;
-    const totalHits = response.totalHits;
+    totalHits = response.totalHits;
 
 
 
-        if (imageArr.length === 0) {
+        if (totalHits === 0) {
             iziToast.error({
                 message: "Sorry, there are no images matching your search query. Please try again!",
                 messageColor: "#ffffff",
@@ -75,22 +72,34 @@ try {
             return;
         };
 
-        hideLoader();
     createGallery(imageArr);
 
-
-    currentPage += 1;
-    const totalPages = Math.ceil(totalHits / per_page);
-
-        if (currentPage <= totalPages) {
+        if (totalHits > PER_PAGE) {
         showLoadMoreButton();
-    
+    }
+    else{
+            hideLoadMoreButton(); 
+            iziToast.info({
+                message: "We're sorry, but you've reached the end of search results.",
+                messageColor: "#ffffff",
+                backgroundColor: "#FFA000",
+                timeout: 5000,
+                titleColor: "#fff",
+                position: "topRight",
+            });
     }
 
 
 } catch (error) {
-        hideLoader();
-        console.log(error);
+        iziToast.error({
+            message: "An error occurred while loading more images. Please try again.",
+            messageColor: "#ffffff",
+            backgroundColor: "#EF4040",
+            timeout: 5000,
+            titleColor: "#fff",
+            iconUrl: errorSvg,
+            position: "topRight",
+        });
 } finally {
         hideLoader();
         refs.form.reset();
@@ -101,6 +110,8 @@ try {
 
 
 const onMoreBtnHandle = async evt => {
+    currentPage += 1;
+
     hideLoadMoreButton();
     showLoader();
     
@@ -110,40 +121,20 @@ const onMoreBtnHandle = async evt => {
 
     const response = await getImagesByQuery(currentQuery, currentPage);
         const newImage = response.hits;
-        const totalHits = response.totalHits;
 
+        appendGallery(newImage);
 
-
-
-        if (newImage.length === 0) {
-            iziToast.error({
-                message: "Sorry, there are no images matching your search query. Please try again!",
-                messageColor: "#ffffff",
-                backgroundColor: "#EF4040",
-                timeout: 5000,
-                titleColor: "#fff",
-                iconUrl: errorSvg,
-                position: "topRight",
-            });
-            return;
-        };
-
-
+        const scrollAmount = getScrollHeight();
+        if (scrollAmount > 0) {
+            scrollBy({
+                top: scrollAmount,
+                behavior: "smooth",
+            })
+        }
         
-        createGallery(newImage);
-        currentPage += 1;
+        const loadedImages = currentPage * PER_PAGE;
 
-        
- galleryCardHeight =  refs.galleryList.querySelector('li').getBoundingClientRect().height;
-
-        scrollBy({
-            top: galleryCardHeight * 2,
-            behavior: "smooth",
-})
-
-        const totalPages = Math.ceil(totalHits / per_page);
-
-        if (currentPage > totalPages) {
+        if (loadedImages >= totalHits) {
             hideLoadMoreButton();
              iziToast.info({
                 message: "We're sorry, but you've reached the end of search results",
@@ -158,7 +149,15 @@ const onMoreBtnHandle = async evt => {
         }
 
     } catch (error) {
-        console.log(error);
+        hideLoadMoreButton();
+        iziToast.error({
+            message: "An error occurred while loading more images. Please try again.",
+            messageColor: "#ffffff",
+            backgroundColor: "#EF4040",
+            timeout: 5000,
+            titleColor: "#fff",
+            position: "topRight",
+        });
     } finally {
         hideLoader();
     }
